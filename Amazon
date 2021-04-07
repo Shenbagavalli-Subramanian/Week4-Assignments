@@ -1,0 +1,72 @@
+package week4.day2.assignment;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class Amazon {
+
+	public static void main(String[] args) {
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions option = new ChromeOptions();
+		option.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(option);
+		driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+		driver.get("https://www.amazon.in/");
+		driver.manage().window().maximize();
+
+		driver.findElement(By.id("twotabsearchtextbox")).sendKeys("one plus 7 pro mobiles",Keys.ENTER);
+	
+		//price of fist mobile
+		String  firstmobprice= driver.findElement(By.xpath("//span[@class='a-price-symbol']/following-sibling::span")).getText();
+		System.out.println("First mobile price "+firstmobprice);
+	
+		//click on image of phone
+		driver.findElement(By.xpath("//div[contains(@class,'a-section aok-relative')]//img")).click();
+		//move to new window
+		Set<String> window=driver.getWindowHandles();
+		
+		List<String> allwindows=new ArrayList<String>(window);
+		String secwindow=allwindows.get(1);
+		driver.switchTo().window(secwindow);
+		//customer ratings
+		String ratings = driver.findElement(By.xpath("//a[@class='a-popover-trigger a-declarative']//i")).getText();
+		System.out.println("Customer ratings "+ratings);
+		
+		//add to cart
+		driver.findElement(By.id("add-to-cart-button")).click();
+		//added to cart verify message
+		String addedToCart = driver.findElement(By.xpath("(//div[@class='a-box-inner a-alert-container']//h4)[3]")).getText();
+		System.out.println(addedToCart);
+		
+		driver.findElement(By.xpath("//*[@id=\"attach-sidesheet-checkout-button\"]/span/input")).click();
+		
+		//confirm title
+		String tit=driver.getTitle();
+		String title="Amazon Sign In";
+		if(tit.contentEquals(title)) {
+			System.out.println("The tile is verified "+tit);
+		}
+		//click continue
+		driver.findElement(By.xpath("//input[@id='continue']")).click();
+		//verify error
+		String enterYourEmail = driver.findElement(By.xpath("(//div[@class='a-box-inner a-alert-container']//div)[2]")).getText();
+		String errorverify="Enter your email or mobile phone number";
+		if(enterYourEmail.contentEquals(errorverify))
+		{
+		System.out.println("The error message is verified "+enterYourEmail);
+		}
+		
+		driver.quit();
+
+	}
+
+}
