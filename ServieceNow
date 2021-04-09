@@ -1,0 +1,126 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.tools.ant.taskdefs.WaitFor;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Wait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class ServiceNow {
+
+	public static void main(String[] args) throws InterruptedException {
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions options=new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver=new ChromeDriver(options);
+		driver.manage().window().maximize();
+		
+		//lauch url
+		driver.get("https://dev68594.service-now.com/");
+		WebElement movetoframe =driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(movetoframe);
+		//username
+		driver.findElement(By.id("user_name")).sendKeys("admin");
+		//password
+		driver.findElement(By.id("user_password")).sendKeys("India@123");
+		driver.findElement(By.id("sysverb_login")).click();
+		
+		driver.switchTo().defaultContent();
+		
+		//filter navigator   incident 
+		driver.findElement(By.id("filter")).sendKeys("incident");
+		Thread.sleep(5000);
+		//click All
+		WebElement clickall=driver.findElement(By.xpath("//div[text()='All']"));
+		clickall.click();
+		//move inside frame
+		
+		WebElement movetoframee =driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(movetoframee);
+		//clcik New
+		driver.findElement(By.id("sysverb_new")).click();
+		Thread.sleep(4000);
+		//INC0018874
+		
+		String incidentnumebr="";
+		incidentnumebr = driver.findElement(By.id("incident.number")).getAttribute("value");
+		Thread.sleep(1000);
+		//incidentnumebr = driver.findElement(By.id("incident.number")).getText();
+		//incidentnumebr = driver.findElement(By.xpath("//*[@id=\"incident.number\"]")).getCssValue("#incident\\.number");
+		System.out.println("The incident number is "+incidentnumebr);
+		
+		
+		//value for caller
+		
+		driver.findElement(By.xpath("//button[@id='lookup.incident.caller_id']//span[1]")).click();
+		//Move to new window
+		Set<String> allwindow=driver.getWindowHandles();
+ 		List<String>window=new ArrayList<String>(allwindow);
+ 		driver.switchTo().window(window.get(1));
+ 		
+ 		//search button
+ 		driver.findElement(By.xpath("//span[@class='sr-only']/following-sibling::input[1]")).sendKeys("Manickam",Keys.ENTER);
+ 		Thread.sleep(2000);
+ 		//select first value
+ 		driver.findElement(By.xpath("//input[@id='sys_user_table_header_search_control']/following::a")).click();
+ 		
+ 		allwindow=driver.getWindowHandles();
+ 		window=new ArrayList<String>(allwindow);
+ 		driver.switchTo().window(window.get(0));
+ 		Thread.sleep(2000);
+ 		WebElement movetoframeer =driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(movetoframeer);
+		//short description
+ 		 Actions builder=new Actions(driver);
+ 		WebElement search=driver.findElement(By.xpath("//*[@id=\"lookup.incident.short_description\"]/span[1]"));
+ 		builder.click(search).perform();
+ 		
+ 		allwindow=driver.getWindowHandles();
+ 		window=new ArrayList<String>(allwindow);
+ 		driver.switchTo().window(window.get(1));
+ 		WebElement descselect=driver.findElement(By.xpath("//tr[@sys_id='e3f78695983100107f2c2ed01a1f16c0']//a[1]"));
+ 		
+ 	     builder.moveToElement(descselect).perform();
+ 	    descselect.click();
+ 	    Thread.sleep(2000);
+		
+ 	   allwindow=driver.getWindowHandles();
+		window=new ArrayList<String>(allwindow);
+		driver.switchTo().window(window.get(0));
+		WebElement movetoframeerr =driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(movetoframeerr);
+		//click submit
+		WebElement sub=driver.findElement(By.id("sysverb_insert_bottom"));
+		builder.click(sub).perform();
+		//search incident before
+		Thread.sleep(2000);
+		
+		WebElement forTextNum = driver.findElement(By.xpath("//span[@class='input-group-addon input-group-select']//select[1]")); 
+		new Select(forTextNum).selectByVisibleText("for text"); 
+		
+		//search incident
+		
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("//input[@placeholder='Search']")).sendKeys(incidentnumebr,Keys.ENTER);
+		
+		
+		//verify incident creation
+		Thread.sleep(2000);
+		WebElement inc= driver.findElement(By.xpath("//*[@aria-label='Open record: "+incidentnumebr+"']"));
+		String verifyinc=inc.getText();
+		System.out.println("The created incident number "+verifyinc);
+		boolean verify=driver.findElement(By.xpath("//*[@aria-label='Open record: "+incidentnumebr+"']")).isDisplayed();
+		if(verify==true)
+		{
+			if(verifyinc.equals(incidentnumebr)) {
+			System.out.println("The incident is created successfully");
+		}
+		}
